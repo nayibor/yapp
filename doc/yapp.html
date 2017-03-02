@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module yapp</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module yapp</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>Yaws applications handler.
+
+<p><b>Introduced in:</b> 11 Dec 2005 by Mikael Karlsson &lt;mikael@creado.se&gt;</p>
+<p><b>Authors:</b> Mikael Karlsson (<a href="mailto:mikael@creado.se"><tt>mikael@creado.se</tt></a>).</p>
+<p><b>See also:</b> <a href="yapp_handler.html">yapp_handler</a>.</p>
+
+<h2><a name="description">Description</a></h2>Yaws applications handler.
+   <p>An easy way to deploy Yaws applications independently of
+   each other.</p>
+   <p>This module implements Yaws runmod and arg_rewrite_mod interfaces.
+   It has functions to insert and remove Yapps to the Yaws sconfs records.
+   It is used by the yapp_handler implementation. The yapp module will make Yaws
+   temporarily switch the docroot
+   to the applications priv/docroot directory when it encounters the registered
+   URL path of the application. One can set another docroot than the default
+    (priv/docroot) by setting the environment variable yapp_docroot in the
+   .app file for the application.
+   The application may also have own appmods which are put in the
+   application environment variable yapp_appmods like: </p>
+   <code>  {env, [
+           {yapp_appmods,[{"ctrl",enityme_controller}]}
+          ]}, </code>
+   <p>
+   In order to include the yapp module, runmod shall be set to yapp.
+   The arg_rewrite_mod shall also be set to yapp and the opaque variable
+   yapp_server_id shall be set to an unique string for every virtual server
+   using yapp, like: </p>
+   <pre>
+   .
+   ebin_dir = /usr/local/yaws/lib/yapp/ebin
+   .
+   runmod = yapp
+   .
+   &lt;server aspen4&gt;
+          port = 8001
+          listen = 0.0.0.0
+          dir_listings = true
+          arg_rewrite_mod = yapp
+          docroot = /home/yaws/scripts/../www
+          &lt;opaque&gt;
+                  yapp_server_id = aspeninternal
+                  bootstrap_yapps = yapp
+          &lt;/opaque&gt;
+   &lt;/server&gt;
+   </pre>
+  
+   <p><em>Note:</em> The yapp application is in itself a "Yapp" with a small admin console.
+   So by adding the line <code>bootstrap_yapps = yapp</code> as above you will get access
+   to the admin console on http://yourservername/yapp/index.html</p>
+   <p><em>Note2:</em> The current available registry implementation uses Mnesia so you need
+   to create a mnesia schema (if not already done) for the node(s) you are running Yaws on.
+   <code>mnesia:create_schema([node()]).</code></p>
+  
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-yawsArg">yawsArg()</a></h3>
+<p><tt>yawsArg() = term()</tt></p>
+<p>This is the #arg record as defined
+   by yaws_api.hrl.
+  </p>
+
+<h3 class="typedecl"><a name="type-yawsGconf">yawsGconf()</a></h3>
+<p><tt>yawsGconf() = term()</tt></p>
+<p>This is the #gconf record as defined
+   by yaws.hrl.</p>
+
+<h3 class="typedecl"><a name="type-yawsSconf">yawsSconf()</a></h3>
+<p><tt>yawsSconf() = term()</tt></p>
+<p>This is the #sconf record as defined
+   by yaws.hrl.
+  </p>
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#arg_rewrite-1">arg_rewrite/1</a></td><td>Interface function for a Yaws arg_rewrite_mod.</td></tr>
+<tr><td valign="top"><a href="#get_bootstrap_yapps-0">get_bootstrap_yapps/0</a></td><td>Gets the Yapps defined in each opaque
+  "bootstrap_yapps = appname1, appname2" for every server id.</td></tr>
+<tr><td valign="top"><a href="#get_server_ids-0">get_server_ids/0</a></td><td>Lists all server ids.</td></tr>
+<tr><td valign="top"><a href="#get_yapps-0">get_yapps/0</a></td><td>Gets all Yapps that are configured for the Yaws server.</td></tr>
+<tr><td valign="top"><a href="#log-3">log/3</a></td><td>Yapp interface to the error_logger.</td></tr>
+<tr><td valign="top"><a href="#prepath-1">prepath/1</a></td><td>Get the Yapp root-path.</td></tr>
+<tr><td valign="top"><a href="#reset_yaws_conf-0">reset_yaws_conf/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#srv_id-1">srv_id/1</a></td><td>Get the server id from an Sconf if available.</td></tr>
+<tr><td valign="top"><a href="#start-0">start/0</a></td><td>Interface function for Yaws run_mod.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="arg_rewrite-1">arg_rewrite/1</a></h3>
+<div class="spec">
+<p><tt>arg_rewrite(Arg::<a href="#type-yawsArg">yawsArg()</a>) -&gt; <a href="#type-yawsArg">yawsArg()</a></tt><br></p>
+</div><p>Interface function for a Yaws arg_rewrite_mod. If
+  it finds a registered Yapp it will strip of the
+  path up to the Yapp and redirect the docroot.</p>
+
+<h3 class="function"><a name="get_bootstrap_yapps-0">get_bootstrap_yapps/0</a></h3>
+<div class="spec">
+<p><tt>get_bootstrap_yapps() -&gt; [{ServerId, [{Path, ApplicationName}]}]</tt>
+<ul class="definitions"><li><tt>ServerId = string()</tt></li><li><tt>Path = string()</tt></li><li><tt>Applicationame = atom()</tt></li></ul></p>
+</div><p>Gets the Yapps defined in each opaque
+  "bootstrap_yapps = appname1, appname2" for every server id. (If available).
+  Bootstrap yapps will get the same pathname as their application name
+  and are "static" meaning that they can not be removed from the server
+  unless yaws.conf is changed (or if embedded yaws - yaws:setconf/2 is used).</p>
+
+<h3 class="function"><a name="get_server_ids-0">get_server_ids/0</a></h3>
+<div class="spec">
+<p><tt>get_server_ids() -&gt; [string()]</tt><br></p>
+</div><p>Lists all server ids.</p>
+
+<h3 class="function"><a name="get_yapps-0">get_yapps/0</a></h3>
+<div class="spec">
+<p><tt>get_yapps() -&gt; [{ServId, [{yapp, Urlpath, Docroot, Appname, Appmods}]}]</tt>
+<ul class="definitions"><li><tt>Urlpath = string()</tt></li><li><tt>Docroot = string()</tt></li><li><tt>Appname = atom()</tt></li><li><tt>Appmods = [atom()]</tt></li></ul></p>
+</div><p>Gets all Yapps that are configured for the Yaws server.</p>
+
+<h3 class="function"><a name="log-3">log/3</a></h3>
+<div class="spec">
+<p><tt>log(Level, FormatStr::string(), Args) -&gt; <a href="#type-void">void()</a></tt>
+<ul class="definitions"><li><tt>Level = error | warning | info | debug</tt></li><li><tt>Args = [term()]</tt></li></ul></p>
+</div><p>Yapp interface to the error_logger.</p>
+
+<h3 class="function"><a name="prepath-1">prepath/1</a></h3>
+<div class="spec">
+<p><tt>prepath(Arg::<a href="#type-yawsArg">yawsArg()</a>) -&gt; Path::string()</tt><br></p>
+</div><p>Get the Yapp root-path. Can be called from a Yapp erl/1
+  fun or an erl section in a .yaws file to get the Yapp root
+  path.</p>
+
+<h3 class="function"><a name="reset_yaws_conf-0">reset_yaws_conf/0</a></h3>
+<div class="spec">
+<p><tt>reset_yaws_conf() -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="srv_id-1">srv_id/1</a></h3>
+<div class="spec">
+<p><tt>srv_id(SC::Sconf) -&gt; string() | undefined</tt>
+<ul class="definitions"><li><tt>Sconf = <a href="#type-yawsSconf">yawsSconf()</a></tt></li></ul></p>
+</div><p>Get the server id from an Sconf if available</p>
+
+<h3 class="function"><a name="start-0">start/0</a></h3>
+<div class="spec">
+<p><tt>start() -&gt; <a href="#type-void">void()</a></tt><br></p>
+</div><p>Interface function for Yaws run_mod.
+  This fun is spawned from Yaws so no return val is expected.
+  All Yapps can expect mnesia to be started, so mnesia is ensured
+  to be started.
+  For every server id that has Yapps the yapp module is registered
+  as an arg_rewrite_mod in #sconf.
+  Configuration data for mapping Yapp paths to applications is looked
+  up in a mnesia registry table and stored in Yaws #sconf.opaque record
+  for the each server id.</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc, Jul 26 2016, 15:50:17.</i></p>
+</body>
+</html>

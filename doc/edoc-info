@@ -1,0 +1,4 @@
+%% encoding: UTF-8
+{application,yapp}.
+{modules,[yapp,yapp_app,yapp_ets_server,yapp_event_handler,yapp_handler,
+          yapp_mnesia_server,yapp_registry,yapp_server,yapp_sup]}.
