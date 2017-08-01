@@ -61,7 +61,7 @@
 -module(yapp).
 -author('mikael@creado.se').
 
--include("yaws_api.hrl").
+-include_lib("yaws/include/yaws_api.hrl").
 -export([arg_rewrite/1, start/0, prepath/1, insert/1, insert/2, remove/2,
          log/3,
          reset_yaws_conf/0, srv_id/1,
